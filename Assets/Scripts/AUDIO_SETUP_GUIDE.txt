@@ -1,0 +1,332 @@
+================================================================================
+               AUDIO SYSTEM SETUP GUIDE - The Silent Attack
+================================================================================
+
+This guide explains how to set up the complete audio system including:
+- Button click sounds for all menus
+- Weapon-specific shooting and reload sounds (AK47, Pistol, Sniper)
+- Enemy shooting sounds
+- Volume control through Settings panel
+- Sensitivity slider integration
+- Settings panel return navigation
+
+================================================================================
+                           STEP 1: AUDIOMANAGER SETUP
+================================================================================
+
+1. CREATE AUDIOMANAGER GAMEOBJECT:
+   - In your Main Menu scene, create an empty GameObject
+   - Name it "AudioManager"
+   - Add the "AudioManager" script component to it
+   
+2. ASSIGN AUDIO CLIPS:
+   In the AudioManager Inspector, you'll see several sections:
+   
+   A) MUSIC CLIPS:
+      - Menu Music: Drag your main menu music clip
+      - Level 1 Music: Drag Level 1 background music
+      - Level 2 Music: Drag Level 2 background music
+      - Level 3 Music: Drag Level 3 background music
+   
+   B) UI SOUNDS:
+      - Button Click Sound: Drag a short click/tap sound effect
+      - Button Hover Sound: (Optional) Drag a subtle hover sound
+   
+   C) WEAPON SOUNDS - AK47:
+      - AK47 Shoot Sound: Drag automatic rifle shooting sound
+      - AK47 Reload Sound: Drag rifle reload/magazine change sound
+   
+   D) WEAPON SOUNDS - PISTOL:
+      - Pistol Shoot Sound: Drag pistol/handgun shooting sound
+      - Pistol Reload Sound: Drag pistol reload sound
+   
+   E) WEAPON SOUNDS - SNIPER:
+      - Sniper Shoot Sound: Drag sniper rifle shooting sound
+      - Sniper Reload Sound: Drag sniper reload sound
+   
+   F) ENEMY WEAPON SOUNDS:
+      - Enemy Shoot Sound: Drag enemy weapon firing sound
+
+3. VOLUME SETTINGS:
+   - Master Volume: 1.0 (controls overall volume)
+   - Music Volume: 0.7 (background music level)
+   - SFX Volume: 1.0 (sound effects level)
+   
+   Note: The AudioManager persists across scenes (DontDestroyOnLoad)
+
+================================================================================
+                         STEP 2: GUN SCRIPT CONFIGURATION
+================================================================================
+
+For EACH player weapon in your game:
+
+1. Select the Gun GameObject in your scene
+2. Find the "Gun" script component in Inspector
+3. Set the "Weapon Type" dropdown:
+   - For AK47: Select "AK47"
+   - For Pistol: Select "Pistol"  
+   - For Sniper: Select "Sniper"
+
+This tells the system which sounds to play when shooting/reloading.
+
+================================================================================
+                      STEP 3: SETTINGS PANEL SETUP
+================================================================================
+
+1. AUDIO SLIDERS:
+   In SettingsManager Inspector:
+   - Master Volume Slider: Drag the Master Volume slider UI element
+   - Music Volume Slider: Drag the Music Volume slider UI element
+   - SFX Volume Slider: Drag the SFX/Sound Effects slider UI element
+   
+   These sliders now automatically control AudioManager volume levels!
+
+2. SENSITIVITY SLIDER:
+   - Mouse Sensitivity Slider: Drag the sensitivity slider UI element
+   - Sensitivity Value Text: Drag the text that displays sensitivity value
+   
+   The sensitivity is saved in PlayerPrefs as "MouseSensitivity"
+   Access it in your player controller with:
+   float sensitivity = PlayerPrefs.GetFloat("MouseSensitivity", 2f);
+
+3. RETURN BUTTON NAVIGATION:
+   The Settings panel now tracks which panel opened it and returns correctly.
+   
+   When opening settings from any menu, call:
+   SettingsManager.SetReturnPanel("PanelName");
+   
+   Examples already implemented:
+   - MainMenuManager: Sets return panel to "MainMenuPanel"
+   - PauseController: Can set return panel to "PausePanel"
+
+================================================================================
+                  STEP 4: PLAYER CONTROLLER SENSITIVITY
+================================================================================
+
+In your FPS player controller script, add this to read sensitivity:
+
+void Start()
+{
+    // Load mouse sensitivity from settings
+    mouseSensitivity = PlayerPrefs.GetFloat("MouseSensitivity", 2f);
+}
+
+void Update()
+{
+    // Reload sensitivity if it changes (optional, for real-time updates)
+    if (Input.GetKeyDown(KeyCode.F5)) // Or check periodically
+    {
+        mouseSensitivity = PlayerPrefs.GetFloat("MouseSensitivity", 2f);
+    }
+}
+
+================================================================================
+                    STEP 5: BUTTON SOUND VERIFICATION
+================================================================================
+
+Button sounds are now automatically added to:
+
+? Main Menu:
+  - Play Button
+  - Level Select Button
+  - Character Select Button
+  - Weapon Select Button
+  - Settings Button
+  - Quit Button
+  - Settings Back Button
+
+? Character Select:
+  - Character 1 Button
+  - Character 2 Button
+  - Character 3 Button
+  - Back Button
+
+? Weapon Select:
+  - Weapon 1 Button
+  - Weapon 2 Button
+  - Weapon 3 Button
+  - Back Button
+
+? Level Select:
+  - Level panels (when clicked)
+  - Back Button
+
+? Pause Menu:
+  - Pause trigger
+  - Resume trigger
+  - Music pauses/resumes automatically
+
+================================================================================
+                     STEP 6: TESTING THE SYSTEM
+================================================================================
+
+1. TEST BUTTON SOUNDS:
+   - Click any menu button
+   - You should hear the button click sound
+   
+   If no sound:
+   - Check AudioManager has Button Click Sound assigned
+   - Check AudioManager exists in scene
+   - Check volume sliders are not at 0
+
+2. TEST WEAPON SOUNDS:
+   - Start a level with a weapon
+   - Fire the weapon ? Should hear weapon-specific shoot sound
+   - Reload (R key) ? Should hear weapon-specific reload sound
+   
+   If no sound:
+   - Check Gun script has correct Weapon Type set
+   - Check AudioManager has weapon sounds assigned
+   - Check SFX volume slider is not at 0
+
+3. TEST ENEMY SOUNDS:
+   - Let an enemy shoot at you
+   - You should hear enemy weapon sound
+   
+4. TEST VOLUME CONTROL:
+   - Open Settings
+   - Move Master Volume slider ? All sounds should change
+   - Move Music Volume slider ? Music should change
+   - Move SFX Volume slider ? Sound effects should change
+
+5. TEST SENSITIVITY:
+   - Open Settings
+   - Move Sensitivity slider ? Value text should update
+   - Click Apply
+   - Value is now saved to PlayerPrefs
+
+6. TEST SETTINGS NAVIGATION:
+   - Open Settings from Main Menu
+   - Click Back ? Should return to Main Menu
+   - Open Settings from Pause Menu
+   - Click Back ? Should return to Pause Menu
+
+================================================================================
+                    STEP 7: ADDING NEW MENU BUTTONS
+================================================================================
+
+When adding new buttons to any menu, add button sound like this:
+
+myButton.onClick.AddListener(() => {
+    if (AudioManager.Instance != null)
+        AudioManager.Instance.PlayButtonClick();
+    
+    MyButtonFunction();
+});
+
+================================================================================
+                           TROUBLESHOOTING
+================================================================================
+
+PROBLEM: No sounds playing at all
+SOLUTION:
+- Check AudioManager GameObject exists in scene
+- Check AudioListener is in the scene (should be on Main Camera)
+- Check Master Volume is not 0
+- Check Audio clips are assigned in AudioManager
+
+PROBLEM: Button sounds not playing
+SOLUTION:
+- Check "Button Click Sound" is assigned in AudioManager
+- Check buttons have proper listeners (see STEP 7)
+
+PROBLEM: Weapon sounds not playing
+SOLUTION:
+- Check Gun script has correct Weapon Type selected
+- Check corresponding audio clips are assigned in AudioManager
+- Check SFX Volume is not 0
+
+PROBLEM: Volume sliders don't work
+SOLUTION:
+- Check sliders are assigned in SettingsManager Inspector
+- Check AudioManager.Instance is not null
+- Check sliders call OnValueChanged events
+
+PROBLEM: Settings doesn't return to correct panel
+SOLUTION:
+- Make sure SetReturnPanel() is called before opening settings
+- Check panel names match exactly (case-sensitive)
+
+PROBLEM: Sensitivity slider doesn't affect player
+SOLUTION:
+- Check you're reading PlayerPrefs.GetFloat("MouseSensitivity", 2f)
+- Check you're applying the value to your camera rotation code
+
+================================================================================
+                            AUDIO CLIPS NEEDED
+================================================================================
+
+You'll need to import these audio files into your project:
+
+UI SOUNDS (2):
+- Button click sound (short, ~0.1-0.2s)
+- Button hover sound (optional, subtle)
+
+WEAPON SOUNDS (6):
+- AK47 shoot (automatic rifle sound)
+- AK47 reload (magazine change)
+- Pistol shoot (handgun sound)
+- Pistol reload
+- Sniper shoot (powerful rifle sound)
+- Sniper reload
+
+ENEMY SOUNDS (1):
+- Enemy weapon shoot
+
+MUSIC (4):
+- Menu background music (looping)
+- Level 1 music (looping)
+- Level 2 music (looping)
+- Level 3 music (looping)
+
+FREE AUDIO RESOURCES:
+- Freesound.org
+- OpenGameArt.org
+- Unity Asset Store (free section)
+- Kenney.nl (Game Audio packs)
+
+================================================================================
+                           ADVANCED FEATURES
+================================================================================
+
+ADDING FOOTSTEP SOUNDS:
+public void PlayFootstep()
+{
+    if (AudioManager.Instance != null && footstepClip != null)
+        AudioManager.Instance.sfxSource.PlayOneShot(footstepClip);
+}
+
+ADDING JUMP SOUNDS:
+public void PlayJump()
+{
+    if (AudioManager.Instance != null && jumpClip != null)
+        AudioManager.Instance.sfxSource.PlayOneShot(jumpClip);
+}
+
+CHANGING MUSIC DYNAMICALLY:
+AudioManager.Instance.PlayMusic(bossMusic);
+
+MUTING ALL AUDIO:
+AudioManager.Instance.SetMasterVolume(0f);
+
+================================================================================
+                              SUMMARY
+================================================================================
+
+Your audio system is now complete with:
+
+? Centralized AudioManager (singleton, persists across scenes)
+? Button click sounds on ALL menu buttons
+? Weapon-specific shoot and reload sounds
+? Enemy weapon sounds
+? Volume control via Settings sliders
+? Sensitivity control via Settings slider
+? Smart Settings panel navigation (returns to caller)
+? Music pausing/resuming with pause menu
+? PlayerPrefs saving for all settings
+
+The system is modular, expandable, and easy to maintain!
+
+================================================================================
+                              END OF GUIDE
+================================================================================
